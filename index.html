@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substitution Tracker</title>
+    <!-- Corrected Bootstrap CSS Link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="container mt-4">
+        <h1 class="mb-4">Substitution Tracker</h1>
+        <div class="mb-3">
+            <h2>Players List</h2>
+            <div v-for="(player, index) in players" :key="index" class="input-group mb-2">
+                <input type="text" class="form-control" v-model="player.name">
+                <button @click="removePlayer(index)" class="btn btn-danger input-group-text">
+                    <i class="fas fa-times"></i> <!-- Replace "Remove" with X icon -->
+                </button>
+            </div>
+            <button @click="addPlayer" class="btn btn-primary">Add Player</button>
+        </div>
+        <div class="mb-4">
+            <label for="numPlayers" class="form-label">Number of Players on Field:</label>
+            <!-- Ensure that the input value is converted to an integer -->
+            <input type="number" id="numPlayers" class="form-control" v-model.number="numOnField">
+        </div>
+            
+        <div class="mb-4">
+            <h2>Players on Field</h2>
+            <div v-for="(player, index) in currentPlayers" :key="index" class="mb-2">
+                <span class="badge bg-primary">{{ player.name }}</span>
+            </div>
+        </div>
+        
+        <div v-if="players.length > numOnField" class="mb-4">
+            <h2>Next Substitution</h2>
+            <div v-if="nextSubstitution" class="mb-2">
+                <p>
+                    <i class="fas fa-arrow-left text-danger"></i> <!-- Red arrow pointing left -->
+                    <strong>Coming Off:</strong> {{ nextSubstitution.off.name }}
+                </p>
+                <p>
+                    <i class="fas fa-arrow-right text-success"></i> <!-- Green arrow pointing right -->
+                    <strong>Going On:</strong> {{ nextSubstitution.on.name }}
+                </p>
+            </div>
+            <button @click="substitute" class="btn btn-primary">
+                Substitute
+            </button>
+        </div>
+    </div>
+
+    <!-- Include Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                players: [
+                    { name: 'Dominic' },
+                    { name: 'Finlay' },
+                    { name: 'Oli' },
+                    { name: 'Monty' },
+                    { name: 'Odhran' },
+                    { name: 'Max' },
+                    { name: 'Archie' },
+                    { name: 'Riddith' },
+                    { name: 'Jack' },
+                ],
+                numOnField: 6,
+                currentIndex: 0,
+            },
+            computed: {
+                currentPlayers() {
+                    if (this.players.length < this.numOnField) {
+                        return this.players;
+                    }
+                    const startIndex = this.currentIndex;
+                    const endIndex = startIndex + this.numOnField;
+                    const playersCopy = [...this.players, ...this.players]; // Duplicate the player list for looping
+                    return playersCopy.slice(startIndex, endIndex);
+                },
+                nextSubstitution() {
+                    if (this.players.length < 2 || this.players.length <= this.numOnField) {
+                        return null; // Not enough players for substitution
+                    }
+                    const off = this.players[this.currentIndex];
+                    const nextIndex = (this.currentIndex + this.numOnField) % this.players.length;
+                    const on = this.players[nextIndex];
+                    return { off, on };
+                },
+            },
+            methods: {
+                addPlayer() {
+                    this.players.push({ name: '' });
+                },
+                removePlayer(index) {
+                    this.players.splice(index, 1);
+                    // Adjust the currentIndex when a player is removed
+                    if (this.currentIndex >= this.players.length) {
+                        this.currentIndex = 0;
+                    }
+                },
+                substitute() {
+                    this.currentIndex = (this.currentIndex + 1) % this.players.length;
+                },
+            },
+        });
+    </script>
+</body>
+</html>
